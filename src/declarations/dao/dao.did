@@ -1,0 +1,40 @@
+type Result_3 = 
+ variant {
+   err: text;
+   ok: vec text;
+ };
+type Result_2 = 
+ variant {
+   err: text;
+   ok: vec Proposal;
+ };
+type Result_1 = 
+ variant {
+   err: text;
+   ok;
+ };
+type Result = 
+ variant {
+   err: text;
+   ok: Proposal;
+ };
+type Proposal = 
+ record {
+   id: nat;
+   pageText: text;
+   status: text;
+   vote: int;
+ };
+service : {
+  adminReset: () -> () oneway;
+  getMBTokenBalance: (text) -> (nat);
+  getMembers: () -> (Result_3) query;
+  getPageText: () -> (text) query;
+  getProposalId: () -> (text) query;
+  get_all_proposals: () -> (Result_2);
+  get_proposal: (nat) -> (Result);
+  registerMember: (text) -> (Result_1);
+  submit_proposal: (text) -> (Result_1);
+  unregisterMember: (text) -> (Result_1);
+  vote: (nat, text) -> (Result);
+}
