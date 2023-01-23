@@ -214,6 +214,9 @@ actor DAO{
 
 
   public shared ({caller}) func submit_proposal(proposalModal: SubmitProposalModal) : async Result.Result<Proposal, Text>{
+    if(isAnon(caller)){
+        return #err("Unauthorized!")
+    };
     let callerPrincipal = Principal.toText(caller);
     switch(neuronOwnersReverseHashmap.get(callerPrincipal)){
         case(?neuronId){
@@ -341,6 +344,9 @@ actor DAO{
   };
 
   public shared ({caller}) func vote(proposalId: Text, isAccepted: Bool) : async Result.Result<Proposal, Text>{
+    if(isAnon(caller)){
+        return #err("Unauthorized!")
+    };
     switch(neuronOwnersReverseHashmap.get(Principal.toText(caller))){
         case(?neuronId){
             let neuronLockedBalance = U.safeGet(neuronLockedBalancesHashmap, neuronId, 0);
@@ -403,6 +409,9 @@ actor DAO{
   };
 
   public shared ({caller}) func quadratic_voting(proposalId: Text, isAccepted: Bool) : async Result.Result<Proposal, Text>{
+    if(isAnon(caller)){
+        return #err("Unauthorized!")
+    };
     let userBalance = await Token.icrc1_balance_of({owner= caller; subaccount = null});
     if(userBalance < minimumAmountOfToken){
         return #err("User don't have enough token to qouadratic vote!");
@@ -453,6 +462,9 @@ actor DAO{
   
   //this should be called after sending tokens to the subaccount get_subaccount_to_lock_tokens returned
   public shared ({caller}) func createNeuron(lockTime: Int) : async Result.Result<Neuron, Text>{
+    if(isAnon(caller)){
+        return #err("Unauthorized!")
+    };
     let six_months = 15552000000000000;
     if(lockTime > 16 * six_months or lockTime < six_months){
         return #err("Dissolve delay can not be higher than 8 years or lower than 6 months!");
@@ -512,8 +524,15 @@ actor DAO{
 
    
   };
+
+  private func isAnon(p: Principal) : Bool{
+    Principal.equal(p, Principal.fromText("2vxsx-fae"))
+  };
   
   public shared ({caller}) func dissolveNeuron(neuronId: Text) : async Result.Result<Neuron, Text>{
+    if(isAnon(caller)){
+        return #err("Unauthorized!")
+    };
     let owner = U.safeGet(neuronOwnersHashmap, neuronId, "");
     if(owner != Principal.toText(caller)){
         return #err("Unauthorized!");
@@ -534,6 +553,9 @@ actor DAO{
   };
 
   public shared ({caller}) func updateNeuron(neuronId: Text, stopDissolving: Bool, newLockTime: ?Int) : async Result.Result<Neuron, Text>{
+    if(isAnon(caller)){
+        return #err("Unauthorized!")
+    };
     let owner = U.safeGet(neuronOwnersHashmap, neuronId, "");
     let six_months = 15552000000000000;
     if(owner != Principal.toText(caller)){
